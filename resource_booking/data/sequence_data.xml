@@ -1,0 +1,8 @@
+<odoo>
+    <record id="seq_resource_booking" model="ir.sequence">
+        <field name="name">Resource Booking</field>
+        <field name="code">resource.booking</field>
+        <field name="prefix">RBK%(y)s</field>
+        <field name="padding">4</field>
+    </record>
+</odoo>

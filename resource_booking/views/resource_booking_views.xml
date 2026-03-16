@@ -1,0 +1,163 @@
+<odoo>
+    <record id="view_resource_booking_tree" model="ir.ui.view">
+        <field name="name">resource.booking.tree</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="resource_id"/>
+                <field name="requester_id"/>
+                <field name="approval_actor_id"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="duration_hours"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_resource_booking_form" model="ir.ui.view">
+        <field name="name">resource.booking.form</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit" type="object" string="Soumettre" class="btn-primary" states="draft"/>
+                    <button name="action_approve" type="object" string="Approuver" class="btn-success" states="to_approve"/>
+                    <button name="action_reject" type="object" string="Rejeter" class="btn-secondary" states="to_approve"/>
+                    <button name="action_checkin" type="object" string="Check-in" class="btn-primary" states="approved"/>
+                    <button name="action_checkout" type="object" string="Check-out" class="btn-primary" states="approved,checked_in"/>
+                    <button name="action_cancel" type="object" string="Annuler" states="draft,to_approve,approved,checked_in"/>
+                    <button name="action_reset_to_draft" type="object" string="Remettre en brouillon" states="rejected,cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_approve,approved,checked_in,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="resource_id"/>
+                            <field name="requester_id"/>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="manager_user_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="start_datetime"/>
+                            <field name="end_datetime"/>
+                            <field name="duration_hours" readonly="1"/>
+                            <field name="approval_required" readonly="1"/>
+                            <field name="approval_actor_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                        <page string="QR Check-in/Check-out">
+                            <group>
+                                <field name="checkin_qr_value" widget="barcode" options="{'symbology': 'QR'}" readonly="1"/>
+                                <field name="checkout_qr_value" widget="barcode" options="{'symbology': 'QR'}" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_resource_booking_calendar" model="ir.ui.view">
+        <field name="name">resource.booking.calendar</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <calendar date_start="start_datetime" date_stop="end_datetime" color="resource_id" mode="week" string="Calendrier des réservations">
+                <field name="name"/>
+                <field name="resource_id"/>
+                <field name="requester_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_resource_booking_kanban" model="ir.ui.view">
+        <field name="name">resource.booking.kanban</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="name"/>
+                <field name="resource_id"/>
+                <field name="requester_id"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record">
+                            <div><strong><field name="name"/></strong></div>
+                            <div><field name="resource_id"/></div>
+                            <div><field name="requester_id"/></div>
+                            <div>
+                                <field name="start_datetime"/> → <field name="end_datetime"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_resource_booking_graph" model="ir.ui.view">
+        <field name="name">resource.booking.graph</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <graph string="Analyse des réservations" type="bar">
+                <field name="resource_id"/>
+                <field name="duration_hours" type="measure"/>
+                <field name="state" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_resource_booking_pivot" model="ir.ui.view">
+        <field name="name">resource.booking.pivot</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <pivot string="Rapport des réservations">
+                <field name="resource_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="duration_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_resource_booking_search" model="ir.ui.view">
+        <field name="name">resource.booking.search</field>
+        <field name="model">resource.booking</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="resource_id"/>
+                <field name="requester_id"/>
+                <field name="approval_actor_id"/>
+                <filter string="En attente" name="to_approve" domain="[('state', '=', 'to_approve')]"/>
+                <filter string="Approuvée" name="approved" domain="[('state', '=', 'approved')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Ressource" name="group_resource" context="{'group_by': 'resource_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Demandeur" name="group_requester" context="{'group_by': 'requester_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_resource_booking" model="ir.actions.act_window">
+        <field name="name">Réservations</field>
+        <field name="res_model">resource.booking</field>
+        <field name="view_mode">tree,calendar,kanban,graph,pivot,form</field>
+        <field name="search_view_id" ref="view_resource_booking_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créez votre première réservation de ressource.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_resource_booking_root" name="Resource Booking" sequence="10"/>
+    <menuitem id="menu_resource_booking_request" name="Réservations" parent="menu_resource_booking_root" action="action_resource_booking" sequence="10"/>
+</odoo>
